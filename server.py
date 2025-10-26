@@ -4,7 +4,7 @@ import requests
 import os
 
 app = Flask(__name__)
-CORS(app)  # 💡 CORS yoqildi – Tilda.cc dan so‘rovlarni qabul qiladi
+CORS(app)
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID")
@@ -22,20 +22,27 @@ def order():
         quantity = data.get("quantity", 1)
         comment = data.get("comment", "")
 
-        message = f"🛎 Yangi buyurtma:\n🏠 Xona: {room}\n☕️ Mahsulot: {product}\n📦 Miqdor: {quantity}\n💬 Izoh: {comment}"
+        message = (
+            f"🛎 Yangi buyurtma:\n"
+            f"🏠 Xona: {room}\n"
+            f"☕️ Mahsulot: {product}\n"
+            f"📦 Miqdor: {quantity}\n"
+            f"💬 Izoh: {comment}"
+        )
 
-        telegram_response = requests.post(
+        res = requests.post(
             f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
             json={"chat_id": ADMIN_CHAT_ID, "text": message}
         )
 
-        if telegram_response.status_code == 200:
-            return jsonify({"status": "success", "message": "Buyurtma yuborildi!"}), 200
+        if res.status_code == 200:
+            return jsonify({"status": "success", "message": "Buyurtma yuborildi!"})
         else:
-            return jsonify({"status": "error", "message": "Telegramga yuborilmadi"}), 500
+            return jsonify({"status": "error", "message": "Telegramga yuborilmadi."}), 500
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 10000))
